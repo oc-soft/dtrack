@@ -163,7 +163,6 @@ int
             except ex:
                 content_id = None
         return content_id
-
     @classmethod
     def commit_content_editting(
             cls, 
@@ -204,39 +203,51 @@ chunk_size : temporary buffer size as bytes for copying. default size are 1024 *
        
         with open(src_path, "r+") as src_fp:
             with open(dst_path, "a") as dst_fp:
-                flock.acquire_lock(src_fp)
-                flock.acquire_lock(dst_fp)
-
-                cls.copy_content(
-                    content_id,
-                    src_path_template,
-                    dst_path_template,
-                    chunk_size)
-                flock.release_lock(src_fp)
-                
-                oid = fltdt.write_path_to_object(
-                    track_data_dir, 'blob', dst_path, chunk_size) 
-                with open(
-                        fltdt.get_index_path(track_data_dir),
-                        "a") as idx_fp:
-                    flock.acquire_lock(idx_fp)
+                try:
+                    flock.acquire_lock(src_fp)
+                    flock.acquire_lock(dst_fp)
+                    cls.copy_content(
+                        content_id,
+                        src_path_template,
+                        dst_path_template,
+                        chunk_size)
+                    flock.release_lock(src_fp)
+                    oid = fltdt.write_path_to_object(
+                        track_data_dir, 'blob', dst_path, chunk_size) 
                     with open(
-                            fltdt.get_head_path(track_data_dir),
-                            "a") as head_fp:
-                        flock.acquire_lock(head_fp)
-                        fltdt.update_index_add(
-                                track_data_dir,
-                                dst_path, dst_path.name, oid)
-                        flock.release_lock(dst_fp)
-                        tree_oid = fltdt.write_tree(track_data_dir)
-                        current_tree_oid = fltdt.get_commit_tree_oid(
-                                track_data_dir, None, chunk_size)
-                        if tree_oid != current_tree_oid:
-                            new_commit_oid = fltdt.create_commit(
-                                    track_data_dir, tree_oid, 
-                                    fltdt.read_oid_from_head(track_data_dir),
-                                    author_name, author_email)
-                            fltdt.update_head(track_data_dir, new_commit_oid)
+                            fltdt.get_index_path(track_data_dir),
+                            "a") as idx_fp:
+                        try:
+                            flock.acquire_lock(idx_fp)
+                            with open(
+                                    fltdt.get_head_path(track_data_dir),
+                                    "a") as head_fp:
+                                try:
+                                    flock.acquire_lock(head_fp)
+                                    fltdt.update_index_add(
+                                            track_data_dir,
+                                            dst_path, dst_path.name, oid)
+                                    flock.release_lock(dst_fp)
+                                    tree_oid = fltdt.write_tree(track_data_dir)
+                                    current_tree_oid = \
+                                            fltdt.get_commit_tree_oid(
+                                                track_data_dir, None,
+                                                chunk_size)
+                                    if tree_oid != current_tree_oid:
+                                        new_commit_oid = fltdt.create_commit(
+                                                track_data_dir, tree_oid, 
+                                                fltdt.read_oid_from_head(
+                                                    track_data_dir),
+                                                author_name, author_email)
+                                        fltdt.update_head(
+                                                track_data_dir, new_commit_oid)
+                                finally:
+                                    pass
+                        finally:
+                            pass
+                finally:
+                    pass
+
         if delete_src:
            os.remove(src_path)
 
