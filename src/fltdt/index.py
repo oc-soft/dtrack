@@ -4,6 +4,7 @@ import struct
 import hashlib
 from pathlib import Path
 
+
 INDEX_HEADER = b"DIRC"
 INDEX_VERSION = 2
 
@@ -12,6 +13,7 @@ def read_index(path: str | Path):
         return []
 
     data = path.read_bytes()
+
     if len(data) < 12:
         return []
 
@@ -21,20 +23,18 @@ def read_index(path: str | Path):
 
     entries = []
     offset = 12
-    for _ in range(count):
+    for idx in range(count):
         # stat fields
         fields = struct.unpack(">LLLLLLLLLL20sH", data[offset:offset+62])
         ctime_s, ctime_n, mtime_s, mtime_n, dev, ino, mode, uid, gid, size, oid, flags = fields
-
-        offset += 62
+        data_len = 62
         name_len = flags & 0x0FFF
-        name = data[offset:offset+name_len].decode()
-        offset += name_len
-
-        # padding to 8-byte alignment
-        pad = (8 - (offset % 8)) % 8
-        offset += pad
-
+        name_offset = offset + data_len 
+        name = data[name_offset:name_offset+name_len].decode()
+        data_len += name_len
+        pad = 8 - (data_len % 8)
+        data_len += pad
+        offset += data_len
         entries.append({
             "ctime_s": ctime_s,
             "ctime_n": ctime_n,
@@ -56,12 +56,10 @@ def read_index(path: str | Path):
 
 def write_index(path : str | Path, entries):
     entries = sorted(entries, key=lambda e: e["name"])
-
     body = b""
     for e in entries:
         name_bytes = e["name"].encode()
         flags = len(name_bytes) & 0x0FFF
-
         entry = struct.pack(
             ">LLLLLLLLLL20sH",
             e["ctime_s"], e["ctime_n"],
@@ -72,15 +70,14 @@ def write_index(path : str | Path, entries):
         )
         entry += name_bytes
 
-        pad = (8 - (len(entry) % 8)) % 8
+        pad = 8 - (len(entry) % 8)
         entry += b"\0" * pad
-
         body += entry
 
     header = struct.pack(">4sLL", INDEX_HEADER, INDEX_VERSION, len(entries))
     checksum = hashlib.sha1(header + body).digest()
 
-    path.write_bytes(header + body + checksum)
+    return path.write_bytes(header + body + checksum)
 
 
 def update_index_add(
@@ -92,7 +89,6 @@ def update_index_add(
 
     st = os.stat(file_path)
     oid = bytes.fromhex(oid_hex)
-
     new_entry = {
         "ctime_s": int(st.st_ctime),
         "ctime_n": 0,
@@ -112,7 +108,6 @@ def update_index_add(
     # 既存エントリを置き換え
     entries = [e for e in entries if e["name"] != entry_name]
     entries.append(new_entry)
-
     write_index(index_path, entries)
 
 def get_index_path(data_dir: str | Path):
