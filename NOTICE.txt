@@ -1,2 +1,2 @@
-flat file data tracking
+data tracking
 Copyright 2026 Toshiyki Ogawa
