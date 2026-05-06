@@ -7,7 +7,7 @@ from pathlib import Path
 INDEX_HEADER = b"DIRC"
 INDEX_VERSION = 2
 
-def read_index(path):
+def read_index(path: str | Path):
     if not path.exists():
         return []
 
@@ -54,7 +54,7 @@ def read_index(path):
     return entries
 
 
-def write_index(path, entries):
+def write_index(path : str | Path, entries):
     entries = sorted(entries, key=lambda e: e["name"])
 
     body = b""
@@ -83,8 +83,11 @@ def write_index(path, entries):
     path.write_bytes(header + body + checksum)
 
 
-def update_index_add(git_dir, file_path, oid_hex):
-    index_path = Path(git_dir) / "index"
+def update_index_add(
+    data_dir: str | Path, 
+    file_path: str | Path,
+    entry_name: str, oid_hex):
+    index_path = get_index_path(data_dir)
     entries = read_index(index_path)
 
     st = os.stat(file_path)
@@ -103,11 +106,17 @@ def update_index_add(git_dir, file_path, oid_hex):
         "size": st.st_size,
         "oid": oid,
         "flags": 0,
-        "name": str(file_path),
+        "name": entry_name,
     }
 
     # 既存エントリを置き換え
-    entries = [e for e in entries if e["name"] != str(file_path)]
+    entries = [e for e in entries if e["name"] != entry_name]
     entries.append(new_entry)
 
     write_index(index_path, entries)
+
+def get_index_path(data_dir: str | Path):
+    """ get index path """
+    return Path(data_dir) / "index"
+    
+

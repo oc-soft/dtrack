@@ -1,0 +1,3 @@
+[submodule "tgstore"]
+	path = tgstore
+	url = ../tgstore.git

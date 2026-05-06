@@ -1,0 +1,50 @@
+
+# commit sequence
+
+>>> import fltdt
+
+>>> import os
+
+>>> from pathlib import Path
+
+>>> fltdt_data_dir = os.getenv('FLTDT_DATA_DIR')
+... # data commit data directory
+
+>>> test_data_dir = os.getenv('TEST_DATA_DIR')
+... # test data directory
+
+>>> src_path = Path(test_data_dir) / 'hello.txt'
+... # test data 
+
+>>> author_name_path = Path(test_data_dir) / 'author-name.txt'
+... # author name file path
+
+>>> author_email_path = Path(test_data_dir) / 'author-email.txt'
+... # author email file path
+
+>>> author_name = author_name_path.read_text().strip()
+... # author name
+
+>>> author_email = author_email_path.read_text().strip()
+... # author email
+
+>>> file_hash = fltdt.write_path_to_object(fltdt_data_dir, 'blob', src_path)
+... # add file as blob
+
+>>> fltdt.update_index_add(fltdt_data_dir, src_path, src_path.name, file_hash)
+... # update index
+
+>>> tree_hash = fltdt.write_tree(fltdt_data_dir)
+... # update index and get new tree hash
+
+>>> head_hash = fltdt.read_oid_from_head(fltdt_data_dir)
+
+>>> new_head_hash = fltdt.create_commit(
+...     fltdt_data_dir, tree_hash, head_hash, author_name, author_email) 
+
+>>> fltdt.update_head(fltdt_data_dir, new_head_hash)
+
+>>> fltdt.read_oid_from_head(fltdt_data_dir) == new_head_hash
+True
+
+# vi: se ts=2 sw=2 et:
