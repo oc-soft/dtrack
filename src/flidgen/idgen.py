@@ -10,18 +10,18 @@ class Idgen:
     def get_id(cls, id_path: str | Path):
         result = None
         try:
-            with open(id_path, "r+") as f:
+            with open(id_path, "r+b", buffering=0) as f:
                 flock.acquire_lock(f)
                 try:
                     f.seek(0, os.SEEK_SET)
-                    ln = f.readline()
-                    if ln:
-                        result = int(ln)
+                    byte_data = f.read()
+                    if len(byte_data):
+                        result = int(byte_data.decode())
                         result += 1
                     else:
                         result = 1
                     f.seek(0, os.SEEK_SET)
-                    f.writelines([str(result)]) 
+                    f.write(f"{result}\n".encode()) 
                 finally:
                     flock.release_lock(f)
         except FileNotFoundError as ex:
