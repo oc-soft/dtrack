@@ -202,51 +202,42 @@ chunk_size : temporary buffer size as bytes for copying. default size are 1024 *
         src_path = Path(src_path_template.format(id=content_id))
        
         with open(src_path, "r+") as src_fp:
+            flock.acquire_lock(src_fp)
             with open(dst_path, "a") as dst_fp:
-                try:
-                    flock.acquire_lock(src_fp)
-                    flock.acquire_lock(dst_fp)
-                    cls.copy_content(
-                        content_id,
-                        src_path_template,
-                        dst_path_template,
-                        chunk_size)
-                    flock.release_lock(src_fp)
-                    oid = fltdt.write_path_to_object(
-                        track_data_dir, 'blob', dst_path, chunk_size) 
+                flock.acquire_lock(dst_fp)
+                cls.copy_content(
+                    content_id,
+                    src_path_template,
+                    dst_path_template,
+                    chunk_size)
+                flock.release_lock(src_fp)
+                oid = fltdt.write_path_to_object(
+                    track_data_dir, 'blob', dst_path, chunk_size) 
+                with open(
+                        fltdt.get_index_path(track_data_dir),
+                        "a") as idx_fp:
+                    flock.acquire_lock(idx_fp)
                     with open(
-                            fltdt.get_index_path(track_data_dir),
-                            "a") as idx_fp:
-                        try:
-                            flock.acquire_lock(idx_fp)
-                            with open(
-                                    fltdt.get_head_path(track_data_dir),
-                                    "a") as head_fp:
-                                try:
-                                    flock.acquire_lock(head_fp)
-                                    fltdt.update_index_add(
-                                            track_data_dir,
-                                            dst_path, dst_path.name, oid)
-                                    flock.release_lock(dst_fp)
-                                    tree_oid = fltdt.write_tree(track_data_dir)
-                                    current_tree_oid = \
-                                            fltdt.get_commit_tree_oid(
-                                                track_data_dir, None,
-                                                chunk_size)
-                                    if tree_oid != current_tree_oid:
-                                        new_commit_oid = fltdt.create_commit(
-                                                track_data_dir, tree_oid, 
-                                                fltdt.read_oid_from_head(
-                                                    track_data_dir),
-                                                author_name, author_email)
-                                        fltdt.update_head(
-                                                track_data_dir, new_commit_oid)
-                                finally:
-                                    pass
-                        finally:
-                            pass
-                finally:
-                    pass
+                            fltdt.get_head_path(track_data_dir),
+                            "a") as head_fp:
+                        flock.acquire_lock(head_fp)
+                        fltdt.update_index_add(
+                                track_data_dir,
+                                dst_path, dst_path.name, oid)
+                        flock.release_lock(dst_fp)
+                        tree_oid = fltdt.write_tree(track_data_dir)
+                        current_tree_oid = \
+                                fltdt.get_commit_tree_oid(
+                                    track_data_dir, None,
+                                    chunk_size)
+                        if tree_oid != current_tree_oid:
+                            new_commit_oid = fltdt.create_commit(
+                                    track_data_dir, tree_oid, 
+                                    fltdt.read_oid_from_head(
+                                        track_data_dir),
+                                    author_name, author_email)
+                            fltdt.update_head(
+                                    track_data_dir, new_commit_oid)
 
         if delete_src:
            os.remove(src_path)
@@ -342,16 +333,12 @@ chunk_size : temporary buffer size as bytes for copying. default size are 1024 *
             dst_path_str = dst_path_template.format(id=content_id)
             with open(src_path_str, "rb+") as src_strm:
                 flock.acquire_lock(src_strm)
-                try:
-                    with open(dst_path_str, "wb") as dst_strm:
-                        flock.acquire_lock(dst_strm)
-                        try:
-                            copied_size = cls.copy_stream(
-                                src_strm, dst_strm, chunk_size)
-                        finally:
-                            flock.release_lock(dst_strm)
-                finally:
-                    flock.release_lock(src_strm)
+                with open(dst_path_str, "wb") as dst_strm:
+                    flock.acquire_lock(dst_strm)
+                    copied_size = cls.copy_stream(
+                        src_strm, dst_strm, chunk_size)
+                    flock.release_lock(dst_strm)
+                flock.release_lock(src_strm)
         return copied_size
     @classmethod
     def copy_stream(cls, src_strm, dst_strm, chunk_size: int=1024 ** 2):
