@@ -86,6 +86,18 @@ class App:
                 id, self.edit_template_path,
                 new_header, self.stream_chunk_size)
 
+    def content_exists(
+        self,
+        content_id: int):
+        """ check content id existence """
+        return Dtrack.exists(content_id, self.release_template_path)
+
+    def content_editing_exists(
+        self,
+        content_id: int):
+        """ check editing content id existence """
+        return Dtrack.exists(content_id, self.edit_template_path)
+ 
     def create_content_for_editing(self):
         """ create new empty content in editing directory """
         content_id = Dtrack.create_content_for_editing(

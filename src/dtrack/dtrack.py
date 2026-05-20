@@ -132,6 +132,25 @@ new_header: dict
                 new_header, path_str, chunk_size)
 
     @classmethod
+    def exists(
+        cls,
+        content_id: int, path_template: str):
+        """
+check whether id's path exists as file
+
+Parameters
+----------
+content_id: int
+
+Returns
+-------
+True if id's path exists
+
+"""
+        path_str = path_template.format(id = content_id) 
+        return Path(path_str).is_file()
+  
+    @classmethod
     def create_content_for_editing(
             cls,
             id_management_path: str | Path,
@@ -365,7 +384,8 @@ chunk_size : temporary buffer size as bytes for copying. default size are 1024 *
             dst_strm.write(chunk)
             total_size += read_size
         return total_size
-                    
+
+                   
     @classmethod
     def init_file_system(
         cls,
