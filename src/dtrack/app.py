@@ -1,6 +1,7 @@
 from pathlib import Path
 import tomllib
 import os
+import re
 
 from .dtrack import Dtrack
 
@@ -26,6 +27,12 @@ class App:
             self._data_tracking_dir = config['tracking-dir']
             self._release_template_path = config['release-template-path']
             self._edit_template_path = config['edit-template-path']
+            self._release_dir = config['release-dir']
+            self._edit_dir = config['edit-dir']
+            self._release_match = config['release-match']
+            self._edit_match = config['edit-match']
+            self._release_id_group_index = config['release-id-group-index']
+            self._edit_id_group_index = config['edit-id-group-index']
             self._id_management_path = config['id-management-path']
             self._stream_chunk_size = config['stream-chunk-size']
 
@@ -54,6 +61,32 @@ class App:
         """ stream chunk size """
         return self._stream_chunk_size
 
+    @property
+    def release_dir(self):
+        """ release directory """
+        return self._release_dir
+
+    @property
+    def edit_dir(self):
+        """ editting directory """ 
+        return self._edit_dir 
+    @property
+    def release_match(self):
+        """ release match """
+        return self._release_match
+    @property
+    def edit_match(self):
+        """ edit match """
+        return self._edit_match
+    @property
+    def release_id_group_index(self):
+        """ get regular expression group index to get id. """
+        return self._release_id_group_index
+    @property
+    def edit_id_group_index(self):
+        """ get regular expression group index to get editing id """
+        return self._edit_id_group_index
+ 
     def get_content(self, id: int, dst_strm):
         """ get content """
         Dtrack.get_content(
@@ -86,6 +119,18 @@ class App:
                 id, self.edit_template_path,
                 new_header, self.stream_chunk_size)
 
+    def content_exists(
+        self,
+        content_id: int):
+        """ check content id existence """
+        return Dtrack.exists(content_id, self.release_template_path)
+
+    def content_editing_exists(
+        self,
+        content_id: int):
+        """ check editing content id existence """
+        return Dtrack.exists(content_id, self.edit_template_path)
+ 
     def create_content_for_editing(self):
         """ create new empty content in editing directory """
         content_id = Dtrack.create_content_for_editing(
@@ -101,6 +146,19 @@ class App:
     def is_editing(self, content_id: int):
         """ True if specified content id is editing. """
         return Dtrack.is_content_exists(content_id, self.edit_template_path)
+
+    def list_content_id(self):
+        """ list content id"""
+        regex = re.compile(self.release_match) 
+        return Dtrack.list_id(
+                self.release_dir, self.release_match,
+                self.release_id_group_index)
+
+    def list_editing_content_id(self):
+        """ list editing content id"""
+        return Dtrack.list_id(
+                self.edit_dir, self.edit_match,
+                self.edit_id_group_index)
 
     def iterate_tree_items(self, tree_id: str):
         """ iterate tree items"""

@@ -1,7 +1,12 @@
-
 tracking-dir = "./test-data/test-1/repository"
 release-template-path = "./test-data/test-1/{id}"
+release-dir = "./test-data/test-1"
+release-match = "(\\d+)$"
+release-id-group-index = 1
 edit-template-path = "./test-data/test-1/{id}-editing"
+edit-dir = "./test-data/test-1"
+edit-match = "(\\d+)-editing$"
+edit-id-group-index = 1
 id-management-path = "./test-data/test-1/idx.txt"
 stream-chunk-size = 256
 
