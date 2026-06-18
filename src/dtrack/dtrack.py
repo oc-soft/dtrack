@@ -176,7 +176,7 @@ list
 """
         regex = re.compile(match_str)
         for entry in os.scandir(dir):
-            if entry.is_file(False):
+            if entry.is_file(follow_symlinks=False):
                 fn = os.fsdecode(entry.name)
                 match = regex.match(fn) 
                 if match is not None:

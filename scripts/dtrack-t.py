@@ -129,10 +129,16 @@ class TestApp:
                     self.dtrack_app.get_header_from_oid(oid).header,
                     indent=2))
     def dtrack_list_content_id(self, **params):
-        print(json.dumps(self.dtrack_app.list_content_id(), indent=2))
+        print(
+            json.dumps(
+                [x for x in self.dtrack_app.list_content_id()],
+                indent=2))
 
     def dtrack_list_editing_content_id(self, **params):
-        print(json.dumps(self.dtrack_app.list_editing_content_id(), indent=2))
+        print(
+            json.dumps(
+                [x for x in self.dtrack_app.list_editing_content_id()],
+                indent=2))
 
 
 if __name__ == "__main__":
