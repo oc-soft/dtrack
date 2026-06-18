@@ -163,6 +163,7 @@ int
             except ex:
                 content_id = None
         return content_id
+
     @classmethod
     def commit_content_editting(
             cls, 
@@ -340,6 +341,30 @@ chunk_size : temporary buffer size as bytes for copying. default size are 1024 *
                     flock.release_lock(dst_strm)
                 flock.release_lock(src_strm)
         return copied_size
+
+    @classmethod
+    def is_content_exists(
+            cls,
+            content_id: int,
+            path_template: str):
+        """
+check whether specified id content exists
+
+Parameters
+__________
+
+content_id: content id
+
+path_template: path template
+
+Returns
+
+True if specified id content exists.
+
+"""
+        path_str = path_template.format(id=content_id)
+        return Path.is_file(path_str) 
+
     @classmethod
     def copy_stream(cls, src_strm, dst_strm, chunk_size: int=1024 ** 2):
         """

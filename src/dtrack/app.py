@@ -98,6 +98,9 @@ class App:
             self.release_template_path,
             self.edit_template_path,
             self.stream_chunk_size)
+    def is_editing(self, content_id: int):
+        """ True if specified content id is editing. """
+        return Dtrack.is_content_exists(content_id, self.edit_template_path)
 
     def iterate_tree_items(self, tree_id: str):
         """ iterate tree items"""
