@@ -19,7 +19,9 @@ class TestApp:
             'content': self.dtrack_content,
             'header': self.dtrack_header,
             'content-history': self.dtrack_content_history,
-            'header-history': self.dtrack_header_history
+            'header-history': self.dtrack_header_history,
+            'list-content-id': self.dtrack_list_content_id,
+            'list-editing-content-id': self.dtrack_list_editing_content_id
         }
 
     @property
@@ -126,6 +128,11 @@ class TestApp:
                 print(json.dumps(
                     self.dtrack_app.get_header_from_oid(oid).header,
                     indent=2))
+    def dtrack_list_content_id(self, **params):
+        print(json.dumps(self.dtrack_app.list_content_id(), indent=2))
+
+    def dtrack_list_editing_content_id(self, **params):
+        print(json.dumps(self.dtrack_app.list_editing_content_id(), indent=2))
 
 
 if __name__ == "__main__":
@@ -144,7 +151,8 @@ if __name__ == "__main__":
                 'init', 'create', 'update', 'update-header',
                 'edit', 'commit', 'history', 'trees', 'items',
                 'content', 'header',
-                'content-history', 'header-history'],
+                'content-history', 'header-history',
+                'list-content-id', 'list-editing-content-id'],
             nargs='?')
     
     argparse.add_argument(

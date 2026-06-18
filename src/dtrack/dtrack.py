@@ -2,6 +2,7 @@ from pathlib import Path
 
 import io
 import os
+import re
 
 import flidgen
 import flock
@@ -149,7 +150,42 @@ True if id's path exists
 """
         path_str = path_template.format(id = content_id) 
         return Path(path_str).is_file()
-  
+    @classmethod
+    def list_id(
+            cls,
+            dir: str | Path,
+            match_str: str,
+            group_index: int):
+        """
+list content files.
+
+Parameters
+__________
+
+dir: str
+
+match_str: str
+
+group_index: int
+
+Returns
+_______
+
+list
+    file name list
+"""
+        regex = re.compile(match_str)
+        for entry in os.scandir(dir):
+            if entry.is_file(False):
+                fn = os.fsdecode(entry.name)
+                match = regex.match(fn) 
+                if match is not None:
+                    try:
+                        str_id = match.group(group_index)
+                        yield int(str_id)
+                    except IndexError:
+                        pass
+
     @classmethod
     def create_content_for_editing(
             cls,
