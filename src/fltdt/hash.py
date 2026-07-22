@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-import hashlib
-import zlib
-from pathlib import Path
 from .objects import write_path_to_object
 
 def hash_and_write_blob(

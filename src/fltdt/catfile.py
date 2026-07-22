@@ -1,5 +1,3 @@
-import zlib
-from pathlib import Path
 from .objects import read_object
 
 def cat_file_p(git_dir, oid):

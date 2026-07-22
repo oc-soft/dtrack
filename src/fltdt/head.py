@@ -5,7 +5,7 @@ def update_head(data_dir, new_commit_oid):
     head_content = None
     try:
         head_content = head_path.read_text().strip()
-    except:
+    except Exception:
         pass
 
     if head_content:
@@ -39,7 +39,7 @@ def read_oid_from_head(data_dir):
             oid = full_ref_path.read_text_strip()
         else:
             oid = head_content
-    except:
+    except Exception:
         pass 
     return oid
 

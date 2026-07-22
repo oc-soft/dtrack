@@ -215,7 +215,7 @@ int
             try:
                 with io.BytesIO() as src_strm:
                     tgstore.TgStore.save_stream({}, src_strm, path_str)
-            except ex:
+            except Exception:
                 content_id = None
         return content_id
 
@@ -359,7 +359,7 @@ path_template : str
 
 content_id: int content id
 """
-        path_str = src_path_template.format(id=content_id)
+        path_str = path_template.format(id=content_id)
         os.remove(path_str)
     @classmethod
     def copy_content(

@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import hashlib
-import io
 import os
 import shutil
 import tempfile

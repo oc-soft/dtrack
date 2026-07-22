@@ -1,7 +1,6 @@
 from pathlib import Path
 import tomllib
 import os
-import re
 
 from .dtrack import Dtrack
 
@@ -149,7 +148,6 @@ class App:
 
     def list_content_id(self):
         """ list content id"""
-        regex = re.compile(self.release_match) 
         return Dtrack.list_id(
                 self.release_dir, self.release_match,
                 self.release_id_group_index)

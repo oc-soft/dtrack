@@ -1,9 +1,3 @@
-import hashlib
-import os
-import struct
-import time
-import zlib
-
 from pathlib import Path
 
 from .objects import write_object, read_object
@@ -58,26 +52,3 @@ def write_tree(data_dir):
     oid = write_object(data_dir, "tree", tree_body)
     return oid
 
-def create_commit(
-    data_dir,
-    tree_oid,
-    parent_oid,
-    author_name,
-    author_email,
-    message=""):
-    # timestamp
-    timestamp = int(time.time())
-
-    lines = []
-    lines.append(f"tree {tree_oid}")
-    if parent_oid:
-        lines.append(f"parent {parent_oid}")
-    lines.append(f"author {author_name} <{author_email}> {timestamp}")
-    lines.append(f"committer {author_name} <{author_email}> {timestamp}")
-    lines.append("")  # one white space
-    lines.append(message)
-
-    body = "\n".join(lines).encode()
-
-    oid = write_object(data_dir, "commit", body)
-    return oid

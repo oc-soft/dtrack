@@ -1,6 +1,3 @@
-import hashlib
-import os
-import zlib
 import time
 from pathlib import Path
 from .objects import write_object, read_object_into_strm, read_object
@@ -38,6 +35,7 @@ def parse_commit(body: bytes):
 
     return info
 
+
 def create_commit(
     data_dir,
     tree_oid,
@@ -57,7 +55,7 @@ def create_commit(
         try:
             for parent_oid in iter(parent_oids): 
                 lines.append(f"parent {parent_oid}")
-        except:
+        except Exception:
             pass
     lines.append(f"author {author_name} <{author_email}> {timestamp}")
     lines.append(f"committer {author_name} <{author_email}> {timestamp}")
@@ -66,7 +64,7 @@ def create_commit(
 
     body = "\n".join(lines).encode()
 
-    oid = write_object(git_dir, "commit", body)
+    oid = write_object(data_dir, "commit", body)
     return oid
 
 def get_commit_tree_oid(

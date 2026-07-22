@@ -24,13 +24,13 @@ class Idgen:
                     f.write(f"{result}\n".encode()) 
                 finally:
                     flock.release_lock(f)
-        except FileNotFoundError as ex:
+        except FileNotFoundError:
             pass
         if result is None:
             try:
                 f = open(id_path, "x")
                 f.close()
-            except FileExistsError as ex: 
+            except FileExistsError: 
                 pass
             result = cls.get_id(id_path) 
         return result
